@@ -148,6 +148,31 @@ void loadAirspySource(Config::Airspy& out, const toml::Value& v) {
   }
 }
 
+void loadLimeSDRSource(Config::LimeSDR& out, const toml::Value& v) {
+  const auto& table = v.as<toml::Table>();
+  for (const auto& it : table) {
+    const auto& key = it.first;
+    const auto& value = it.second;
+
+    if (key == "frequency") {
+      out.frequency = value.as<int>();
+      continue;
+    }
+
+    if (key == "gain") {
+      out.gain = value.as<int>();
+      continue;
+    }
+
+    if (key == "sample_publisher") {
+      out.samplePublisher = createSamplePublisher(value);
+      continue;
+    }
+
+    throwInvalidKey(key);
+  }
+}
+
 void loadRTLSDRSource(Config::RTLSDR& out, const toml::Value& v) {
   const auto& table = v.as<toml::Table>();
   for (const auto& it : table) {
@@ -367,6 +392,10 @@ Config Config::load(const std::string& file) {
       continue;
     }
 
+    if (key == "limesdr") {
+      loadLimeSDRSource(out.limesdr, value);
+    }
+
     if (key == "nanomsg") {
       loadNanomsgSource(out.nanomsg, value);
       continue;
@@ -421,10 +450,12 @@ Config Config::load(const std::string& file) {
   if (out.demodulator.downlinkType == "lrit") {
     setIfZero(out.airspy.frequency, 1691000000u);
     setIfZero(out.rtlsdr.frequency, 1691000000u);
+    setIfZero(out.limesdr.frequency, 1691000000u);
   }
   if (out.demodulator.downlinkType == "hrit") {
     setIfZero(out.airspy.frequency, 1694100000u);
     setIfZero(out.rtlsdr.frequency, 1694100000u);
+    setIfZero(out.limesdr.frequency, 1694100000u);
   }
 
   return out;

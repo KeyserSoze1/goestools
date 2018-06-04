@@ -21,7 +21,7 @@ struct Config {
     // LRIT or HRIT
     std::string downlinkType;
 
-    // String "airspy" or "rtlsdr"
+    // String "airspy" or "rtlsdr" or "limesdr"
     std::string source;
 
     // Demodulator statistics (gain, frequency correction, etc.)
@@ -54,6 +54,17 @@ struct Config {
   };
 
   RTLSDR rtlsdr;
+
+  struct LimeSDR {
+    uint32_t frequency = 0;
+
+    // Applies to the LMS_SetGaindB setting
+    uint8_t gain = 30;
+
+    std::unique_ptr<SamplePublisher> samplePublisher;
+  };
+
+  LimeSDR limesdr;
 
   struct Nanomsg {
     // Address to connect to

@@ -27,6 +27,16 @@ else()
   target_link_libraries(rtlsdr_source ${RTLSDR_LIBRARY} publisher stdc++)
 endif()
 
+find_library(LIMESUITE_LIBRARY
+  NAMES libLimeSuite.so
+  PATH_SUFFIXES arm-linux-gnueabihf)
+if(NOT LIMESUITE_LIBRARY)
+  message(WARNING "Unable to find libLimeSuite")
+else()
+  add_library(limesdr_source limesdr_source.cc)
+  target_link_libraries(limesdr_source ${LIMESUITE_LIBRARY} publisher stdc++)
+endif()
+
 add_library(nanomsg_source nanomsg_source.cc)
 target_link_libraries(nanomsg_source nanomsg publisher stdc++)
 
@@ -64,6 +74,10 @@ endif()
 if(RTLSDR_LIBRARY)
   target_compile_definitions(goesrecv PUBLIC -DBUILD_RTLSDR)
   target_link_libraries(goesrecv rtlsdr_source)
+endif()
+if(LIMESUITE_LIBRARY)
+  target_compile_definitions(goesrecv PUBLIC -DBUILD_LIMESDR)
+  target_link_libraries(goesrecv limesdr_source)
 endif()
 
 add_executable(benchmark benchmark.cc)

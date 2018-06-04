@@ -8,6 +8,10 @@
 #include "rtlsdr_source.h"
 #endif
 
+#ifdef BUILD_LIMESDR
+#include "limesdr_source.h"
+#endif
+
 #include "nanomsg_source.h"
 
 std::unique_ptr<Source> Source::build(
@@ -31,6 +35,16 @@ std::unique_ptr<Source> Source::build(
     rtlsdr->setTunerGain(config.rtlsdr.gain);
     rtlsdr->setSamplePublisher(std::move(config.rtlsdr.samplePublisher));
     return std::unique_ptr<Source>(rtlsdr.release());
+  }
+#endif
+#ifdef BUILD_LIMESDR
+  if (type == "limesdr") {
+    auto limesdr = LimeSDR::open();
+    limesdr->setSampleRate(3000000);
+    limesdr->setFrequency(config.limesdr.frequency);
+    limesdr->setGain(config.limesdr.gain);
+    limesdr->setSamplePublisher(std::move(config.limesdr.samplePublisher));
+    return std::unique_ptr<Source>(limesdr.release());
   }
 #endif
   if (type == "nanomsg") {
